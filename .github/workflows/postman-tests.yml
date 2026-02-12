@@ -1,0 +1,16 @@
+name: Postman Tests
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Install Postman CLI
+      run: npm install -g newman
+      
+    - name: Run Postman tests
+      run: newman run your-collection.json --iterations 2 --reporter-junit results.xml
