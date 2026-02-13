@@ -21,29 +21,31 @@ jobs:
       - name: Install Postman CLI
         run: npm install -g postman-cli
       
-      - name: Verify Postman CLI
-        run: postman --version
+      - name: Login to Postman
+        run: echo "${{ secrets.POSTMAN_API_KEY }}" | postman login
       
-      - name: Manual Login Method
+      - name: Create test output directory
         run: |
-          mkdir -p ~/.postman
-          echo "{\"apiKey\":\"${{ secrets.POSTMAN_API_KEY }}\"}" > ~/.postman/config.json
-          echo "✅ Config file created"
-          cat ~/.postman/config.json | cut -c1-20
+          mkdir -p ${{ github.workspace }}/test-output
+          echo "✅ Output directory: ${{ github.workspace }}/test-output"
       
-      - name: Verify Login
+      - name: Run Postman Collection
         run: |
-          postman whoami || echo "⚠️ Can't verify login, continuing..."
-      
-      - name: Run Collection
-        run: |
+          pwd
           postman collection run 52326850-adedfe2f-d602-42b6-a731-8ed7abedb843 \
             --reporters cli,junit \
-            --reporter-junit-export postman-results.xml
+            --reporter-junit-export ${{ github.workspace }}/test-output/postman-results.xml
       
-      - name: Upload results
+      - name: Verify file was created
+        run: |
+          echo "=== CHECKING FOR OUTPUT FILE ==="
+          ls -la ${{ github.workspace }}/test-output/ || echo "Directory empty"
+          ls -la ${{ github.workspace }}/test-output/postman-results.xml && echo "✅ File exists!" || echo "❌ File not found"
+          cat ${{ github.workspace }}/test-output/postman-results.xml | head -20 || echo "Cannot read file"
+      
+      - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: postman-test-report
-          path: postman-results.xml
+          path: ${{ github.workspace }}/test-output/postman-results.xml
