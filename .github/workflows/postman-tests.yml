@@ -10,8 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -21,20 +20,21 @@ jobs:
       - name: Install Postman CLI
         run: npm install -g postman-cli
       
-      - name: Verify Postman CLI
-        run: postman --version
+      - name: Login to Postman
+        run: echo "${{ secrets.POSTMAN_API_KEY }}" | postman login --with-api-key-stdin
+        env:
+          POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
       
-      # 🔐 YOU NEED THIS STEP!
-      - name: Login to Postman CLI
-        run: postman login --api-key ${{ secrets.POSTMAN_API_KEY }}
+      - name: Verify Login
+        run: postman whoami || echo "⚠️ Login failed"
       
-      - name: Run Postman Collection
+      - name: Run Collection
         run: |
           postman collection run 52326850-adedfe2f-d602-42b6-a731-8ed7abedb843 \
             --reporters cli,junit \
             --reporter-junit-export postman-results.xml
       
-      - name: Upload test results
+      - name: Upload results
         uses: actions/upload-artifact@v4
         if: always()
         with:
