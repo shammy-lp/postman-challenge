@@ -3,9 +3,7 @@ name: Postman CLI Challenge
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
 
 jobs:
   test:
@@ -25,13 +23,12 @@ jobs:
       
       - name: Verify Postman CLI
         run: postman --version
-
-      # 🔹 Added login step
-      - name: Login to Postman CLI
-        run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
       
-      # 🔹 Updated collection ID to forked collection
-      - name: Run Postman Echo Collection
+      # 🔐 YOU NEED THIS STEP!
+      - name: Login to Postman CLI
+        run: postman login --api-key ${{ secrets.POSTMAN_API_KEY }}
+      
+      - name: Run Postman Collection
         run: |
           postman collection run 52326850-adedfe2f-d602-42b6-a731-8ed7abedb843 \
             --reporters cli,junit \
