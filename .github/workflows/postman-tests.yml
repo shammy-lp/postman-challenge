@@ -1,16 +1,40 @@
-name: Postman Tests
+name: Postman CLI Challenge
 
-on: [push]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Manual trigger
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
       
-    - name: Install Postman CLI
-      run: npm install -g newman
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
       
-    - name: Run Postman tests
-      run: newman run your-collection.json --iterations 2 --reporter-junit results.xml
+      - name: Install Postman CLI
+        run: npm install -g postman-cli
+      
+      - name: Verify Postman CLI
+        run: postman --version
+      
+      - name: Run Postman Echo Collection
+        run: |
+          postman collection run 91528472-6e68-41d6-ae60-89187aacd7ac \
+            --reporters cli,junit \
+            --reporter-junit-export postman-results.xml
+      
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: postman-test-report
+          path: postman-results.xml
