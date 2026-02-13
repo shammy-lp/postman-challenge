@@ -3,6 +3,8 @@ name: Postman CLI Challenge
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -24,28 +26,15 @@ jobs:
       - name: Login to Postman
         run: echo "${{ secrets.POSTMAN_API_KEY }}" | postman login
       
-      - name: Create test output directory
-        run: |
-          mkdir -p ${{ github.workspace }}/test-output
-          echo "✅ Output directory: ${{ github.workspace }}/test-output"
-      
       - name: Run Postman Collection
         run: |
-          pwd
-          postman collection run 52326850-adedfe2f-d602-42b6-a731-8ed7abedb843 \
+          postman collection run 52326850-c2bc1f87-6bd7-4322-88eb-8cead2a76a25 \
             --reporters cli,junit \
-            --reporter-junit-export ${{ github.workspace }}/test-output/postman-results.xml
-      
-      - name: Verify file was created
-        run: |
-          echo "=== CHECKING FOR OUTPUT FILE ==="
-          ls -la ${{ github.workspace }}/test-output/ || echo "Directory empty"
-          ls -la ${{ github.workspace }}/test-output/postman-results.xml && echo "✅ File exists!" || echo "❌ File not found"
-          cat ${{ github.workspace }}/test-output/postman-results.xml | head -20 || echo "Cannot read file"
+            --reporter-junit-export ${{ github.workspace }}/postman-results.xml
       
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: postman-test-report
-          path: ${{ github.workspace }}/test-output/postman-results.xml
+          path: ${{ github.workspace }}/postman-results.xml
