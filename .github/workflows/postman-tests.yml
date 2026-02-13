@@ -23,8 +23,10 @@ jobs:
       - name: Install Postman CLI
         run: npm install -g postman-cli
       
-      - name: Login to Postman
-        run: echo "${{ secrets.POSTMAN_API_KEY }}" | postman login
+      - name: Configure Postman API Key
+        run: |
+          mkdir -p ~/.postman
+          echo "{\"apiKey\":\"${{ secrets.POSTMAN_API_KEY }}\"}" > ~/.postman/config.json
       
       - name: Run Postman Collection
         run: |
