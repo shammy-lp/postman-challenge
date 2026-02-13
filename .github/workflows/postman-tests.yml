@@ -25,10 +25,13 @@ jobs:
       
       - name: Verify Postman CLI
         run: postman --version
+
+      - name: Login to Postman CLI
+        run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
       
       - name: Run Postman Echo Collection
         run: |
-          postman collection run 91528472-6e68-41d6-ae60-89187aacd7ac \
+          postman collection run 52326850-adedfe2f-d602-42b6-a731-8ed7abedb843 \
             --reporters cli,junit \
             --reporter-junit-export postman-results.xml
       
@@ -38,3 +41,4 @@ jobs:
         with:
           name: postman-test-report
           path: postman-results.xml
+
