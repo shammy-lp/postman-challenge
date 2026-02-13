@@ -10,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -20,13 +21,19 @@ jobs:
       - name: Install Postman CLI
         run: npm install -g postman-cli
       
-      - name: Login to Postman
-        run: echo "${{ secrets.POSTMAN_API_KEY }}" | postman login --with-api-key-stdin
-        env:
-          POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
+      - name: Verify Postman CLI
+        run: postman --version
+      
+      - name: Manual Login Method
+        run: |
+          mkdir -p ~/.postman
+          echo "{\"apiKey\":\"${{ secrets.POSTMAN_API_KEY }}\"}" > ~/.postman/config.json
+          echo "✅ Config file created"
+          cat ~/.postman/config.json | cut -c1-20
       
       - name: Verify Login
-        run: postman whoami || echo "⚠️ Login failed"
+        run: |
+          postman whoami || echo "⚠️ Can't verify login, continuing..."
       
       - name: Run Collection
         run: |
